@@ -1,5 +1,12 @@
 import request from '@/utils/request'
 
+export function loginkey() {
+  return request({
+    url: '/user/loginkey',
+    method: 'get'
+  })
+}
+
 export function login(data) {
   return request({
     url: '/user/login',
