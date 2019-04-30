@@ -1,5 +1,13 @@
 import request from '@/utils/request'
 
+export function list(query) {
+  return request({
+    url: '/user/list',
+    method: 'get',
+    params: query
+  })
+}
+
 export function loginkey() {
   return request({
     url: '/user/loginkey',

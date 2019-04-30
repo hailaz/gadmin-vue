@@ -112,6 +112,60 @@ export const asyncRoutes = [
       }
     ]
   },
+  {
+    path: 'external-link',
+    component: 'layout/Layout',
+    children: [
+      {
+        path: 'https://github.com/PanJiaChen/vue-element-admin',
+        meta: { title: 'externalLink', icon: 'link' }
+      }
+    ]
+  }
+
+  // { path: '*', redirect: '/404', hidden: true }
+]
+
+export const asyncRoutes1 = [
+  {
+    path: '/permission',
+    component: 'layout/Layout',
+    redirect: '/permission/index',
+    alwaysShow: true,
+    meta: {
+      title: 'permission',
+      icon: 'lock',
+      roles: ['admin', 'editor']
+    },
+    children: [
+      {
+        path: 'page',
+        component: 'views/permission/page',
+        name: 'PagePermission',
+        meta: {
+          title: 'pagePermission',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'directive',
+        component: 'views/permission/directive',
+        name: 'DirectivePermission',
+        meta: {
+          title: 'directivePermission'
+        }
+      },
+      {
+        path: 'role',
+        component: 'views/permission/role',
+        name: 'RolePermission',
+        meta: {
+          title: 'rolePermission',
+          roles: ['admin']
+        }
+      }
+    ]
+  },
 
   {
     path: '/icon',

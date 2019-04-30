@@ -99,6 +99,7 @@ export const constantRoutes = [
     path: '/guide',
     component: Layout,
     redirect: '/guide/index',
+    hidden: true,
     children: [
       {
         path: 'index',
@@ -129,6 +130,25 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
+  {
+    path: '/user',
+    component: Layout,
+    redirect: '/user/list',
+    name: 'user',
+    meta: {
+      title: 'user',
+      icon: 'user'
+    },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/user/list'),
+        name: 'usere',
+        meta: { title: 'user' }
+
+      }
+    ]
+  },
   {
     path: '/permission',
     component: Layout,
@@ -390,8 +410,8 @@ export const asyncRoutes = [
     component: Layout,
     children: [
       {
-        path: 'https://github.com/PanJiaChen/vue-element-admin',
-        meta: { title: 'externalLink', icon: 'link' }
+        path: 'https://www.baidu.com',
+        meta: { title: 'baidu.com', icon: 'link' }
       }
     ]
   },

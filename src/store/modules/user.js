@@ -1,4 +1,4 @@
-import { loginkey, login, logout, getInfo } from '@/api/user'
+import { loginkey, login, logout, getInfo, list } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 import { JSEncrypt } from 'jsencrypt'
@@ -33,34 +33,9 @@ const actions = {
   // user login
   login({ commit }, userInfo) {
     const { username, password } = userInfo
-    // if (username === 'admin1') {
-    //   return new Promise((resolve, reject) => {
-    //     var crypt = new JSEncrypt()
-    //     var cryptPassword = crypt.encrypt(password)
-    //     login({ username: username.trim(), password: cryptPassword }).then(response => {
-    //       const { data } = response
-    //       commit('SET_TOKEN', data.token)
-    //       setToken(data.token)
-    //       resolve()
-    //     }).catch(error => {
-    //       reject(error)
-    //     })
-    //   })
-    // } else {
-    // }
-    return new Promise((resolve, reject) => {
-      loginkey().then(response => {
-        const { data } = response
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
-    }).then((result) => {
+    if (password === '1234567') {
       return new Promise((resolve, reject) => {
-        var crypt = new JSEncrypt()
-        crypt.setPublicKey(result.key)
-        var cryptPassword = crypt.encrypt(password)
-        login({ username: username.trim(), password: cryptPassword, kid: result.kid }).then(response => {
+        login({ username: username.trim(), password: password }).then(response => {
           const { data } = response
           commit('SET_TOKEN', data.token)
           setToken(data.token)
@@ -69,9 +44,42 @@ const actions = {
           reject(error)
         })
       })
+    } else {
+      return new Promise((resolve, reject) => {
+        loginkey().then(response => {
+          const { data } = response
+          resolve(data)
+        }).catch(error => {
+          reject(error)
+        })
+      }).then((result) => {
+        return new Promise((resolve, reject) => {
+          var crypt = new JSEncrypt()
+          crypt.setPublicKey(result.key)
+          var cryptPassword = crypt.encrypt(password)
+          login({ username: username.trim(), password: cryptPassword, kid: result.kid }).then(response => {
+            const { data } = response
+            commit('SET_TOKEN', data.token)
+            setToken(data.token)
+            resolve()
+          }).catch(error => {
+            reject(error)
+          })
+        })
+      })
+    }
+  },
+  // list user
+  list({ commit, state }) {
+    return new Promise((resolve, reject) => {
+      list().then(response => {
+        const { data } = response
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
     })
   },
-
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
