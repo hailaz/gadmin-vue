@@ -7,10 +7,11 @@ export function getRoutes() {
   })
 }
 
-export function getRoles() {
+export function getRoles(query) {
   return request({
-    url: '/roles',
-    method: 'get'
+    url: '/role',
+    method: 'get',
+    params: query
   })
 }
 
@@ -22,9 +23,9 @@ export function addRole(data) {
   })
 }
 
-export function updateRole(id, data) {
+export function updateRole(data) {
   return request({
-    url: `/role/${id}`,
+    url: `/role`,
     method: 'put',
     data
   })

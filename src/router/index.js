@@ -84,18 +84,6 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/documentation',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/documentation/index'),
-        name: 'Documentation',
-        meta: { title: 'documentation', icon: 'documentation', affix: true }
-      }
-    ]
-  },
-  {
     path: '/guide',
     component: Layout,
     redirect: '/guide/index',
@@ -136,19 +124,33 @@ export const asyncRoutes = [
     redirect: '/user/list',
     name: 'user',
     meta: {
-      title: 'user',
+      title: '用户管理',
       icon: 'user'
     },
     children: [
       {
         path: 'list',
         component: () => import('@/views/user/list'),
-        name: 'usere',
-        meta: { title: 'user' }
+        name: 'list',
+        meta: {
+          title: '用户列表'
+        }
+
+      },
+      {
+        path: '/role/list',
+        component: () => import('@/views/user/role'),
+        name: 'role',
+        meta: {
+          title: '角色列表'
+        }
 
       }
     ]
-  },
+  }
+]
+export const asyncRoutes1 = [
+
   {
     path: '/permission',
     component: Layout,

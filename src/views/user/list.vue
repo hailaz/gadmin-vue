@@ -8,21 +8,25 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="180px" align="center" label="Date">
-        <template slot-scope="scope">
-          <span>{{ scope.row.add_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column min-width="300px" label="Title">
+      <el-table-column width="180px" label="username">
         <template slot-scope="scope">
           <span>{{ scope.row.user_name }}</span>
         </template>
       </el-table-column>
-
-      <el-table-column width="110px" align="center" label="Author">
+      <el-table-column width="180px" label="nickname">
         <template slot-scope="scope">
           <span>{{ scope.row.nick_name }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="180px" align="center" label="addtime">
+        <template slot-scope="scope">
+          <span>{{ scope.row.add_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column min-width="180px" align="center" label="updatetime">
+        <template slot-scope="scope">
+          <span>{{ scope.row.update_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
       <!--
@@ -53,12 +57,12 @@
       </el-table-column>
     </el-table>
     <!-- $t is vue-i18n global function to translate lang (lang in @/lang)  -->
-    <div class="show-d">
+    <!-- <div class="show-d">
       <el-tag style="margin-right:12px;">{{ $t('table.dragTips1') }} :</el-tag> {{ oldList }}
     </div>
     <div class="show-d">
       <el-tag>{{ $t('table.dragTips2') }} :</el-tag> {{ newList }}
-    </div>
+    </div> -->
   </div>
 </template>
 
