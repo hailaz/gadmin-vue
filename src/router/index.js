@@ -144,6 +144,14 @@ export const asyncRoutes = [
         meta: {
           title: '角色列表'
         }
+      },
+      {
+        path: '/policy/list',
+        component: () => import('@/views/user/policy'),
+        name: 'policy',
+        meta: {
+          title: '权限列表'
+        }
 
       }
     ]
