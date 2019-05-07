@@ -18,23 +18,61 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column :label="$t('table.role')" align="center" width="80">
+      <el-table-column align="center" :label="$t('table.id')" width="65">
         <template slot-scope="scope">
-          <span>{{ scope.row.role }}</span>
+          <span>{{ scope.row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.roleName')" min-width="150px" align="center">
+
+      <el-table-column width="80px" :label="$t('table.userName')">
         <template slot-scope="scope">
-          <span>{{ scope.row.name }}</span>
+          <span>{{ scope.row.user_name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column min-width="100px" :label="$t('table.nickName')">
+        <template slot-scope="scope">
+          <span>{{ scope.row.nick_name }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="180px" :label="$t('table.email')">
+        <template slot-scope="scope">
+          <span>{{ scope.row.email }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="110px" :label="$t('table.phone')">
+        <template slot-scope="scope">
+          <span>{{ scope.row.phone }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column width="110px" :label="$t('table.status')">
+        <template slot-scope="scope">
+          <span>{{ scope.row.status }}</span>
+        </template>
+      </el-table-column>
+
+      <!-- <el-table-column width="80px" :label="$t('table.addUser')">
+        <template slot-scope="scope">
+          <span>{{ scope.row.add_user_id }}</span>
+        </template>
+      </el-table-column> -->
+
+      <el-table-column width="180px" align="center" :label="$t('table.addtime')">
+        <template slot-scope="scope">
+          <span>{{ scope.row.add_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column width="180px" align="center" :label="$t('table.updatetime')">
+        <template slot-scope="scope">
+          <span>{{ scope.row.update_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
       <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
-          </el-button>
-          <el-button type="primary" size="mini" @click="handleUpdatePolicy(row)">
-            {{ $t('table.policy') }}
           </el-button>
           <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
             {{ $t('table.delete') }}
@@ -46,14 +84,27 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="90px" style="width: 400px; margin-left:50px;">
-        <el-form-item :label="$t('table.role')" prop="role">
-          <el-input v-if="dialogStatus==='create'" v-model="temp.role" />
-          <span v-else>{{ temp.role }}</span>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="120px" style="width: 400px; margin-left:50px;">
+        <el-form-item :label="$t('table.userName')" prop="user_name">
+          <el-input v-if="dialogStatus==='create'" v-model="temp.user_name" />
+          <span v-else>{{ temp.user_name }}</span>
         </el-form-item>
-        <el-form-item :label="$t('table.roleName')" prop="name">
-          <el-input v-model="temp.name" />
+        <el-form-item :label="$t('table.nickName')" prop="nick_name">
+          <el-input v-model="temp.nick_name" />
         </el-form-item>
+        <el-form-item :label="$t('table.password')" prop="password">
+          <el-input v-model="temp.password" type="password" />
+        </el-form-item>
+        <el-form-item :label="$t('table.passwordconfirm')" prop="passwordconfirm">
+          <el-input v-model="temp.passwordconfirm" type="password" />
+        </el-form-item>
+        <el-form-item :label="$t('table.email')" prop="email">
+          <el-input v-model="temp.email" />
+        </el-form-item>
+        <el-form-item :label="$t('table.phone')" prop="phone">
+          <el-input v-model="temp.phone" />
+        </el-form-item>
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">
@@ -65,27 +116,11 @@
       </div>
     </el-dialog>
 
-    <el-dialog :visible.sync="dialogPolicyVisible" title="权限修改">
-      <el-checkbox v-model="checkAll" :indeterminate="isIndeterminate" @change="handleCheckAllChange">全选</el-checkbox>
-      <div style="margin: 15px 0;" />
-      <el-checkbox-group v-model="checkedPolicys" @change="handleCheckedPolicysChange">
-        <el-checkbox v-for="policy in allPolicys" :key="policy.policy" :label="policy.policy">{{ policy.name }}</el-checkbox>
-      </el-checkbox-group>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogPolicyVisible = false">
-          {{ $t('table.cancel') }}
-        </el-button>
-        <el-button type="primary" @click="handleUpdateRolePolicy()">
-          {{ $t('table.confirm') }}
-        </el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getRoles, addRole, updateRole, deleteRole } from '@/api/role'
-import { getPolicyByRole, setPolicyByRole } from '@/api/policy'
+import { getUsers, addUser, updateUser, deleteUser } from '@/api/user'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
@@ -104,6 +139,25 @@ export default {
     }
   },
   data() {
+    var validatePass = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else {
+        if (this.temp.passwordconfirm !== '') {
+          this.$refs.dataForm.validateField('passwordconfirm')
+        }
+        callback()
+      }
+    }
+    var validatePass2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.temp.password) {
+        callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
     return {
       list: null,
       total: 0,
@@ -116,8 +170,12 @@ export default {
       },
       showReviewer: false,
       temp: {
-        role: '',
-        name: ''
+        user_name: '',
+        nick_name: '',
+        email: '',
+        phone: '',
+        password: '',
+        passwordconfirm: ''
       },
       dialogFormVisible: false,
       dialogPolicyVisible: false,
@@ -127,8 +185,11 @@ export default {
         create: 'Create'
       },
       rules: {
-        role: [{ required: true, message: 'role is required', trigger: 'blur' }],
-        name: [{ required: true, message: 'name is required', trigger: 'blur' }]
+        user_name: [{ required: true, message: 'username is required', trigger: 'blur' }],
+        nick_name: [{ required: true, message: 'nickname is required', trigger: 'blur' }],
+        phone: [{ required: true, message: 'phone is required', trigger: 'blur' }],
+        password: [{ validator: validatePass, trigger: 'blur' }],
+        passwordconfirm: [{ validator: validatePass2, trigger: 'blur' }]
       },
       checkAll: false,
       checkedPolicys: [],
@@ -144,7 +205,7 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      getRoles(this.listQuery).then(response => {
+      getUsers(this.listQuery).then(response => {
         this.list = response.data.items
         this.total = response.data.total
 
@@ -165,8 +226,12 @@ export default {
     },
     resetTemp() {
       this.temp = {
-        role: '',
-        name: ''
+        user_name: '',
+        nick_name: '',
+        email: '',
+        phone: '',
+        password: '',
+        passwordconfirm: ''
       }
     },
     handleCreate() {
@@ -181,7 +246,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           this.temp.author = 'vue-element-admin'// TODO
-          addRole(this.temp).then(() => {
+          addUser(this.temp).then(() => {
             this.list.unshift(this.temp)
             this.dialogFormVisible = false
             this.$notify({
@@ -202,38 +267,11 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    handleUpdatePolicy(row) {
-      // this.temp = Object.assign({}, row) // copy obj
-      this.currentRole = row.role
-      getPolicyByRole({ role: row.role }).then(response => {
-        this.allPolicys = []
-        this.checkedPolicys = []
-        this.checkedAllPolicys = []
-        response.data.all_policy_items.forEach(item => {
-          this.checkedAllPolicys.push(item.policy)
-          if (item.name !== '') {
-            this.allPolicys.push(item)
-          } else {
-            item.name = item.policy
-            this.allPolicys.push(item)
-          }
-        })
-        response.data.role_policy_items.forEach(item => {
-          this.checkedPolicys.push(item.policy)
-        })
-        if (this.checkedPolicys.length > 0) {
-          this.isIndeterminate = true
-        } else {
-          this.isIndeterminate = false
-        }
-        this.dialogPolicyVisible = true
-      })
-    },
     updateData() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          updateRole(tempData).then(() => {
+          updateUser(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
                 const index = this.list.indexOf(v)
@@ -258,8 +296,7 @@ export default {
         confirmButtonText: '删除',
         cancelButtonText: '取消'
       }).then(() => {
-        this.temp = Object.assign({}, row) // copy obj
-        deleteRole(this.temp).then(() => {
+        deleteUser({ id: row.id }).then(() => {
           const index = this.list.indexOf(row)
           this.list.splice(index, 1)
           this.$notify({
@@ -269,21 +306,6 @@ export default {
             duration: 2000
           })
         })
-      })
-    },
-    handleCheckAllChange(val) {
-      this.checkedPolicys = val ? this.checkedAllPolicys : []
-      this.isIndeterminate = false
-    },
-    handleCheckedPolicysChange(value) {
-      const checkedCount = value.length
-      this.checkAll = checkedCount === this.allPolicys.length
-      this.isIndeterminate = checkedCount > 0 && checkedCount < this.allPolicys.length
-    },
-    handleUpdateRolePolicy() {
-      setPolicyByRole({ role: this.currentRole, policys: this.checkedPolicys }).then(() => {
-        this.currentRole = ''
-        this.dialogPolicyVisible = false
       })
     }
   }
