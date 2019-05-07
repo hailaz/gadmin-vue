@@ -16,3 +16,18 @@ export function updatePolicy(data) {
   })
 }
 
+export function getPolicyByRole(query) {
+  return request({
+    url: '/policy/byrole',
+    method: 'get',
+    params: query
+  })
+}
+
+export function setPolicyByRole(data) {
+  return request({
+    url: '/policy/byrole',
+    method: 'put',
+    data
+  })
+}

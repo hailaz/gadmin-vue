@@ -31,9 +31,10 @@ export function updateRole(data) {
   })
 }
 
-export function deleteRole(id) {
+export function deleteRole(data) {
   return request({
-    url: `/role/${id}`,
-    method: 'delete'
+    url: `/role`,
+    method: 'delete',
+    data
   })
 }

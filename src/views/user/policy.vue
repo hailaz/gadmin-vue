@@ -1,13 +1,13 @@
 <template>
   <div class="app-container">
     <el-table v-loading="listLoading" :data="list" border fit highlight-current-row style="width: 100%">
-      <el-table-column label="权限路径" width="200px" align="center">
+      <el-table-column :label="$t('table.policyPath')" width="200px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.policy }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column min-width="300px" label="权限名称">
+      <el-table-column min-width="300px" :label="$t('table.policyName')">
         <template slot-scope="{row}">
           <template v-if="row.edit">
             <el-input v-model="row.name" class="edit-input" size="small" />
@@ -19,7 +19,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column align="center" label="操作" width="120">
+      <el-table-column align="center" :label="$t('table.actions')" width="120">
         <template slot-scope="{row}">
           <el-button v-if="row.edit" type="success" size="small" icon="el-icon-circle-check-outline" @click="confirmEdit(row)">
             Ok
