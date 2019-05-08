@@ -38,3 +38,11 @@ export function deleteRole(data) {
     data
   })
 }
+
+export function setUserRoleByUserName(data) {
+  return request({
+    url: '/role/byuser',
+    method: 'put',
+    data
+  })
+}

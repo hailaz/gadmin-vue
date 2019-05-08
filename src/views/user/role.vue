@@ -36,7 +36,7 @@
           <el-button type="primary" size="mini" @click="handleUpdatePolicy(row)">
             {{ $t('table.policy') }}
           </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
             {{ $t('table.delete') }}
           </el-button>
         </template>
@@ -120,7 +120,6 @@ export default {
         name: ''
       },
       dialogFormVisible: false,
-      dialogPolicyVisible: false,
       dialogStatus: '',
       textMap: {
         update: 'Edit',
@@ -130,6 +129,7 @@ export default {
         role: [{ required: true, message: 'role is required', trigger: 'blur' }],
         name: [{ required: true, message: 'name is required', trigger: 'blur' }]
       },
+      dialogPolicyVisible: false,
       checkAll: false,
       checkedPolicys: [],
       checkedAllPolicys: [],

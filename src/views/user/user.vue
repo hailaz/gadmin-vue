@@ -74,7 +74,10 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
-          <el-button v-if="row.status!='deleted'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button v-if="row.user_name!='admin'" type="primary" size="mini" @click="handleUpdateRole(row)">
+            {{ $t('table.role') }}
+          </el-button>
+          <el-button size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
             {{ $t('table.delete') }}
           </el-button>
         </template>
@@ -116,11 +119,29 @@
       </div>
     </el-dialog>
 
+    <el-dialog :visible.sync="dialogRoleVisible" title="权限修改">
+      <el-checkbox v-model="checkAll" :indeterminate="isIndeterminate" @change="handleCheckAllChange">全选</el-checkbox>
+      <div style="margin: 15px 0;" />
+      <el-checkbox-group v-model="checkedRoles" :min="1" @change="handleCheckedRolesChange">
+        <el-checkbox v-for="role in allRoles" :key="role.role" :label="role.role">{{ role.name }}</el-checkbox>
+      </el-checkbox-group>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogRoleVisible = false">
+          {{ $t('table.cancel') }}
+        </el-button>
+        <el-button type="primary" @click="handleUpdateRoleRole()">
+          {{ $t('table.confirm') }}
+        </el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
 import { getUsers, addUser, updateUser, deleteUser } from '@/api/user'
+import { getRoles, setUserRoleByUserName } from '@/api/role'
+import { validEmail } from '@/utils/validate'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
@@ -140,7 +161,7 @@ export default {
   },
   data() {
     var validatePass = (rule, value, callback) => {
-      if (value === '') {
+      if (value === '' && this.dialogStatus === 'create') {
         callback(new Error('请输入密码'))
       } else {
         if (this.temp.passwordconfirm !== '') {
@@ -150,10 +171,17 @@ export default {
       }
     }
     var validatePass2 = (rule, value, callback) => {
-      if (value === '') {
+      if (value === '' && this.dialogStatus === 'create') {
         callback(new Error('请再次输入密码'))
       } else if (value !== this.temp.password) {
         callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
+    const validateEmail = (rule, value, callback) => {
+      if (!validEmail(value)) {
+        callback(new Error('Please enter the correct user name'))
       } else {
         callback()
       }
@@ -178,7 +206,6 @@ export default {
         passwordconfirm: ''
       },
       dialogFormVisible: false,
-      dialogPolicyVisible: false,
       dialogStatus: '',
       textMap: {
         update: 'Edit',
@@ -187,16 +214,18 @@ export default {
       rules: {
         user_name: [{ required: true, message: 'username is required', trigger: 'blur' }],
         nick_name: [{ required: true, message: 'nickname is required', trigger: 'blur' }],
+        email: [{ required: true, trigger: 'blur', validator: validateEmail }],
         phone: [{ required: true, message: 'phone is required', trigger: 'blur' }],
         password: [{ validator: validatePass, trigger: 'blur' }],
         passwordconfirm: [{ validator: validatePass2, trigger: 'blur' }]
       },
+      dialogRoleVisible: false,
       checkAll: false,
-      checkedPolicys: [],
-      checkedAllPolicys: [],
-      allPolicys: [],
+      checkedRoles: [],
+      checkedAllRoles: [],
+      allRoles: [],
       isIndeterminate: false,
-      currentRole: ''
+      currentUserName: ''
     }
   },
   created() {
@@ -247,8 +276,8 @@ export default {
         if (valid) {
           this.temp.author = 'vue-element-admin'// TODO
           addUser(this.temp).then(() => {
-            this.list.unshift(this.temp)
             this.dialogFormVisible = false
+            this.getList()
             this.$notify({
               title: '成功',
               message: '创建成功',
@@ -272,14 +301,8 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           updateUser(tempData).then(() => {
-            for (const v of this.list) {
-              if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
-              }
-            }
             this.dialogFormVisible = false
+            this.getList()
             this.$notify({
               title: '成功',
               message: '更新成功',
@@ -297,8 +320,7 @@ export default {
         cancelButtonText: '取消'
       }).then(() => {
         deleteUser({ id: row.id }).then(() => {
-          const index = this.list.indexOf(row)
-          this.list.splice(index, 1)
+          this.getList()
           this.$notify({
             title: '成功',
             message: '删除成功',
@@ -306,6 +328,47 @@ export default {
             duration: 2000
           })
         })
+      })
+    }, handleUpdateRole(row) {
+      this.currentUserName = row.user_name
+      getRoles({ limit: -1, username: row.user_name }).then(response => {
+        this.allRoles = []
+        this.checkedRoles = []
+        this.checkedAllRoles = []
+        response.data.items.forEach(item => {
+          this.checkedAllRoles.push(item.role)
+          if (item.name !== '') {
+            this.allRoles.push(item)
+          } else {
+            item.name = item.role
+            this.allRoles.push(item)
+          }
+        })
+        response.data.role_items.forEach(item => {
+          this.checkedRoles.push(item.role)
+        })
+        if (this.checkedRoles.length > 0) {
+          this.isIndeterminate = true
+        } else {
+          this.isIndeterminate = false
+        }
+        this.dialogRoleVisible = true
+      })
+      // this.temp = Object.assign({}, row) // copy obj
+    },
+    handleCheckAllChange(val) {
+      this.checkedRoles = val ? this.checkedAllRoles : []
+      this.isIndeterminate = false
+    },
+    handleCheckedRolesChange(value) {
+      const checkedCount = value.length
+      this.checkAll = checkedCount === this.allRoles.length
+      this.isIndeterminate = checkedCount > 0 && checkedCount < this.allRoles.length
+    },
+    handleUpdateRoleRole() {
+      setUserRoleByUserName({ username: this.currentUserName, roles: this.checkedRoles }).then(() => {
+        this.currentUserName = ''
+        this.dialogRoleVisible = false
       })
     }
   }
