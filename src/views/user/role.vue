@@ -222,10 +222,12 @@ export default {
           this.checkedPolicys.push(item.policy)
         })
         if (this.checkedPolicys.length > 0) {
-          this.isIndeterminate = true
+          this.checkAll = this.checkedPolicys.length === this.allPolicys.length
+          this.isIndeterminate = !this.checkAll
         } else {
           this.isIndeterminate = false
         }
+
         this.dialogPolicyVisible = true
       })
     },
