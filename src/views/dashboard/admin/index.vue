@@ -1,5 +1,6 @@
 <template>
   <div class="dashboard-editor-container">
+    Welcome to gadmin！
     <!-- <github-corner class="github-corner" />
 
     <panel-group @handleSetLineChartData="handleSetLineChartData" />
