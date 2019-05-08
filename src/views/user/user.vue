@@ -348,9 +348,11 @@ export default {
           this.checkedRoles.push(item.role)
         })
         if (this.checkedRoles.length > 0) {
-          this.isIndeterminate = true
+          this.checkAll = this.checkedRoles.length === this.allRoles.length
+          this.isIndeterminate = !this.checkAll
         } else {
           this.isIndeterminate = false
+          this.checkAll = false
         }
         this.dialogRoleVisible = true
       })

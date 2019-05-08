@@ -226,6 +226,7 @@ export default {
           this.isIndeterminate = !this.checkAll
         } else {
           this.isIndeterminate = false
+          this.checkAll = false
         }
 
         this.dialogPolicyVisible = true
