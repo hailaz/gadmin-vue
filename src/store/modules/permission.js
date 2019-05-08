@@ -5,10 +5,7 @@ import { getRoutes } from '@/api/role'
 // import Layout from '@/layout'
 
 export const componentsMap = {
-  'layout/Layout': () => import('@/layout'),
-  'views/permission/page': () => import('@/views/permission/page'),
-  'views/permission/directive': () => import('@/views/permission/directive'),
-  'views/permission/role': () => import('@/views/permission/role')
+  'layout/Layout': () => import('@/layout')
 }
 
 /**
