@@ -2,14 +2,14 @@ import request from '@/utils/request'
 
 export function getRoutes() {
   return request({
-    url: '/routes',
+    url: '/v1/routes',
     method: 'get'
   })
 }
 
 export function getRoles(query) {
   return request({
-    url: '/role',
+    url: '/v1/role',
     method: 'get',
     params: query
   })
@@ -17,7 +17,7 @@ export function getRoles(query) {
 
 export function addRole(data) {
   return request({
-    url: '/role',
+    url: '/v1/role',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function addRole(data) {
 
 export function updateRole(data) {
   return request({
-    url: `/role`,
+    url: `/v1/role`,
     method: 'put',
     data
   })
@@ -33,7 +33,7 @@ export function updateRole(data) {
 
 export function deleteRole(data) {
   return request({
-    url: `/role`,
+    url: `/v1/role`,
     method: 'delete',
     data
   })
@@ -41,7 +41,7 @@ export function deleteRole(data) {
 
 export function setUserRoleByUserName(data) {
   return request({
-    url: '/role/byuser',
+    url: '/v1/role/byuser',
     method: 'put',
     data
   })

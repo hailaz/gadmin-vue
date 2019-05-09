@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function list(query) {
   return request({
-    url: '/user/list',
+    url: '/v1/user/list',
     method: 'get',
     params: query
   })
@@ -10,14 +10,14 @@ export function list(query) {
 
 export function loginkey() {
   return request({
-    url: '/user/loginkey',
+    url: '/loginkey',
     method: 'get'
   })
 }
 
 export function login(data) {
   return request({
-    url: '/user/login',
+    url: '/login',
     method: 'post',
     data
   })
@@ -25,7 +25,7 @@ export function login(data) {
 
 export function getInfo(token) {
   return request({
-    url: '/user/info',
+    url: '/v1/user/info',
     method: 'get',
     params: { token }
   })
@@ -33,14 +33,14 @@ export function getInfo(token) {
 
 export function logout() {
   return request({
-    url: '/user/logout',
+    url: '/v1/user/logout',
     method: 'post'
   })
 }
 
 export function getUsers(query) {
   return request({
-    url: '/user',
+    url: '/v1/user',
     method: 'get',
     params: query
   })
@@ -48,7 +48,7 @@ export function getUsers(query) {
 
 export function addUser(data) {
   return request({
-    url: '/user',
+    url: '/v1/user',
     method: 'post',
     data
   })
@@ -56,7 +56,7 @@ export function addUser(data) {
 
 export function updateUser(data) {
   return request({
-    url: `/user`,
+    url: `/v1/user`,
     method: 'put',
     data
   })
@@ -64,7 +64,7 @@ export function updateUser(data) {
 
 export function deleteUser(data) {
   return request({
-    url: `/user`,
+    url: `/v1/user`,
     method: 'delete',
     data
   })
