@@ -2,7 +2,10 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken, getTokenExpireTime } from '@/utils/auth'
-
+/* 是否有请求正在刷新token*/
+window.isRefreshing = false
+/* 被挂起的请求数组*/
+let refreshSubscribers = []
 function isTokenExpired() {
   var exp = getTokenExpireTime()
   if (!exp) {
@@ -15,6 +18,16 @@ function isTokenExpired() {
     return true
   }
   return false
+}
+
+/* push所有请求到数组中*/
+function subscribeTokenRefresh(cb) {
+  refreshSubscribers.push(cb)
+}
+
+/* 刷新请求（refreshSubscribers数组中的请求得到新的token之后会自执行，用新的token去请求数据）*/
+function onRrefreshed(token) {
+  refreshSubscribers.map(cb => cb(token))
 }
 
 // create an axios instance
@@ -35,9 +48,26 @@ service.interceptors.request.use(
           /* 将刷新token的标志置为true*/
           window.isRefreshing = true
           store.dispatch('user/refreshToken').then(() => {
+            /* 执行数组里的函数,重新发起被挂起的请求*/
+            onRrefreshed(getToken())
+            /* 执行onRefreshed函数后清空数组中保存的请求*/
+            refreshSubscribers = []
             /* 将标志置为false*/
             window.isRefreshing = false
+          }).catch(() => {
+
           })
+
+          /* 把请求(token)=>{....}都push到一个数组中*/
+          const retry = new Promise((resolve, reject) => {
+            /* (token) => {...}这个函数就是回调函数*/
+            subscribeTokenRefresh((token) => {
+              config.headers['Authorization'] = token
+              /* 将请求挂起*/
+              resolve(config)
+            })
+          })
+          return retry
         }
       }
       // let each request carry token --['X-Token'] as a custom key.
