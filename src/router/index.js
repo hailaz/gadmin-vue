@@ -106,7 +106,7 @@ export const asyncRoutes = [
     redirect: '/user/list',
     name: 'user',
     meta: {
-      title: '用户管理',
+      title: 'user',
       icon: 'user'
     },
     children: [
@@ -115,7 +115,7 @@ export const asyncRoutes = [
         component: () => import('@/views/user/user'),
         name: 'list',
         meta: {
-          title: '用户列表'
+          title: 'userList'
         }
 
       },
@@ -124,7 +124,7 @@ export const asyncRoutes = [
         component: () => import('@/views/user/role'),
         name: 'role',
         meta: {
-          title: '角色列表'
+          title: 'roleList'
         }
       },
       {
@@ -133,7 +133,7 @@ export const asyncRoutes = [
         name: 'policy',
         meta: {
           roles: ['admin'],
-          title: '权限列表'
+          title: 'policyList'
         }
 
       }
