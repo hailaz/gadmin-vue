@@ -77,7 +77,7 @@
           <el-button v-if="row.user_name!='admin'" type="primary" size="mini" @click="handleUpdateRole(row)">
             {{ $t('table.role') }}
           </el-button>
-          <el-button size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button v-if="row.user_name!='admin'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
             {{ $t('table.delete') }}
           </el-button>
         </template>
