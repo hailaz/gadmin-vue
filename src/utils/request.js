@@ -1,7 +1,21 @@
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
-import { getToken } from '@/utils/auth'
+import { getToken, getTokenExpireTime } from '@/utils/auth'
+
+function isTokenExpired() {
+  var exp = getTokenExpireTime()
+  if (!exp) {
+    return false
+  }
+  var nowTime = new Date()
+  var date = new Date(exp)
+  var expSec = parseInt((date.getTime() - nowTime.getTime()) / 1000)
+  if (expSec < 300) {
+    return true
+  }
+  return false
+}
 
 // create an axios instance
 const service = axios.create({
@@ -16,8 +30,19 @@ service.interceptors.request.use(
     // do something before request is sent
 
     if (store.getters.token) {
+      if (isTokenExpired()) {
+        if (!window.isRefreshing) {
+          /* 将刷新token的标志置为true*/
+          window.isRefreshing = true
+          store.dispatch('user/refreshToken').then(() => {
+            /* 将标志置为false*/
+            window.isRefreshing = false
+          })
+        }
+      }
       // let each request carry token --['X-Token'] as a custom key.
       // please modify it according to the actual situation.
+
       config.headers['Authorization'] = getToken()
     }
     return config
@@ -53,7 +78,7 @@ service.interceptors.response.use(
       })
 
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
+      if (res.code === 401 || res.code === 50008 || res.code === 50012 || res.code === 50014) {
         // to re-login
         MessageBox.confirm('You have been logged out, you can cancel to stay on this page, or log in again', 'Confirm logout', {
           confirmButtonText: 'Re-Login',

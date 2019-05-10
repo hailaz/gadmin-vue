@@ -1,5 +1,5 @@
-import { loginkey, login, logout, getInfo, list } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { loginkey, login, logout, getInfo, list, refreshToken } from '@/api/user'
+import { getToken, setToken, removeToken, setTokenExpireTime } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
 import { JSEncrypt } from 'jsencrypt'
 
@@ -33,41 +33,29 @@ const actions = {
   // user login
   login({ commit }, userInfo) {
     const { username, password } = userInfo
-    if (password === '1234567') {
+    return new Promise((resolve, reject) => {
+      loginkey().then(response => {
+        const { data } = response
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+    }).then((result) => {
       return new Promise((resolve, reject) => {
-        login({ username: username.trim(), password: password }).then(response => {
+        var crypt = new JSEncrypt()
+        crypt.setPublicKey(result.key)
+        var cryptPassword = crypt.encrypt(password)
+        login({ username: username.trim(), password: cryptPassword, kid: result.kid }).then(response => {
           const { data } = response
           commit('SET_TOKEN', data.token)
           setToken(data.token)
+          setTokenExpireTime(data.expire)
           resolve()
         }).catch(error => {
           reject(error)
         })
       })
-    } else {
-      return new Promise((resolve, reject) => {
-        loginkey().then(response => {
-          const { data } = response
-          resolve(data)
-        }).catch(error => {
-          reject(error)
-        })
-      }).then((result) => {
-        return new Promise((resolve, reject) => {
-          var crypt = new JSEncrypt()
-          crypt.setPublicKey(result.key)
-          var cryptPassword = crypt.encrypt(password)
-          login({ username: username.trim(), password: cryptPassword, kid: result.kid }).then(response => {
-            const { data } = response
-            commit('SET_TOKEN', data.token)
-            setToken(data.token)
-            resolve()
-          }).catch(error => {
-            reject(error)
-          })
-        })
-      })
-    }
+    })
   },
   // list user
   list({ commit, state }) {
@@ -80,10 +68,23 @@ const actions = {
       })
     })
   },
+  refreshToken({ commit, state }) {
+    return new Promise((resolve, reject) => {
+      refreshToken().then(response => {
+        const { data } = response
+        commit('SET_TOKEN', data.token)
+        setToken(data.token)
+        setTokenExpireTime(data.expire)
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
+      getInfo().then(response => {
         const { data } = response
 
         if (!data) {

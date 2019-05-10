@@ -23,11 +23,17 @@ export function login(data) {
   })
 }
 
-export function getInfo(token) {
+export function refreshToken() {
+  return request({
+    url: '/refresh_token',
+    method: 'get'
+  })
+}
+
+export function getInfo() {
   return request({
     url: '/v1/user/info',
-    method: 'get',
-    params: { token }
+    method: 'get'
   })
 }
 
