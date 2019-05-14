@@ -1,6 +1,8 @@
 <template>
   <div class="dashboard-editor-container">
     Welcome to gadmin！
+    <br>
+    <a href="https://github.com/hailaz/gadmin" target="_blank" rel="noopener noreferrer">访问 gadmin github</a>
     <!-- <github-corner class="github-corner" />
 
     <panel-group @handleSetLineChartData="handleSetLineChartData" />
