@@ -1,11 +1,15 @@
 import { asyncRoutes, constantRoutes } from '@/router'
 // import { constantRoutes } from '@/router'
-import { getRoutes } from '@/api/role'
+import { getUserMenus } from '@/api/menu'
 /* Layout */
 // import Layout from '@/layout'
 
 export const componentsMap = {
-  'layout/Layout': () => import('@/layout')
+  'layout': () => import('@/layout'),
+  'user/user': () => import('@/views/user/user'),
+  'user/role': () => import('@/views/user/role'),
+  'user/policy': () => import('@/views/user/policy'),
+  'user/menu': () => import('@/views/user/menu')
 }
 
 /**
@@ -30,18 +34,31 @@ function convertRouter(asyncRouterMap) {
   if (asyncRouterMap) {
     asyncRouterMap.forEach(item => {
       var parent = generateRouter(item, true)
-      var children = []
-      if (item.children) {
-        item.children.forEach(child => {
-          children.push(generateRouter(child, false))
-        })
-      }
-      parent.children = children
+      parent.children = getChildrenMenu(item.children)
       accessedRouters.push(parent)
     })
+    accessedRouters.sort(function(a, b) { // 升序
+      return a.sort - b.sort
+    })
   }
-  accessedRouters.push({ path: '*', redirect: '/404', hidden: true })
+  accessedRouters.push({ path: '*', redirect: '/404', hidden: true }) // 404错误页面，一定要放最后
   return accessedRouters
+}
+
+// 递归获取子菜单
+function getChildrenMenu(childrenList) {
+  var childrenMenu = []
+  if (childrenList) {
+    childrenList.forEach(child => {
+      var cMenu = generateRouter(child, false)
+      cMenu.children = getChildrenMenu(child.children)
+      childrenMenu.push(cMenu)
+    })
+    childrenMenu.sort(function(a, b) { // 升序
+      return a.sort - b.sort
+    })
+  }
+  return childrenMenu
 }
 
 function generateRouter(item, isParent) {
@@ -49,8 +66,11 @@ function generateRouter(item, isParent) {
     path: item.path,
     name: item.name,
     meta: item.meta,
+    sort: item.sort,
+    redirect: item.redirect,
+    alwaysShow: item.alwaysShow,
+    hidden: item.hidden,
     // component: isParent ? Layout : () => import('@/' + item.component)
-
     component: componentsMap[item.component]
   }
   return router
@@ -91,7 +111,7 @@ const mutations = {
 
 const actions = {
   generateRoutes({ commit }, roles) {
-    if (roles != null) {
+    if (roles == null) {
       return new Promise(resolve => {
         let accessedRoutes
         // console.log(JSON.stringify(accessedRoutes))
@@ -107,9 +127,8 @@ const actions = {
       })
     } else {
       return new Promise((resolve, reject) => {
-        getRoutes().then(response => {
-          const { data } = response
-          const asyncRoutes = data
+        getUserMenus().then(response => {
+          const asyncRoutes = response.data
           // console.log(constantRoutes)
           // console.log(asyncRoutes)
           let accessedRoutes
@@ -118,7 +137,9 @@ const actions = {
           } else {
             accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
           }
+
           accessedRoutes = convertRouter(accessedRoutes)
+          // console.log(accessedRoutes)
           // console.log('====')
           // console.log(JSON.stringify(accessedRoutes))
           commit('SET_ROUTES', accessedRoutes)

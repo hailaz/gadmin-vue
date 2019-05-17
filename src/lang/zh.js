@@ -66,7 +66,8 @@ export default {
     user: '用户管理',
     userList: '用户列表',
     roleList: '角色列表',
-    policyList: '权限列表'
+    policyList: '权限列表',
+    menuList: '菜单列表'
   },
   navbar: {
     dashboard: '首页',
@@ -150,7 +151,17 @@ export default {
     phone: '手机',
     addUser: '操作用户',
     password: '密码',
-    passwordconfirm: '密码确认'
+    passwordconfirm: '密码确认',
+    path: '路径',
+    component: '模块',
+    redirect: '面包屑导航跳转地址',
+    name: '名称',
+    hidden: '是否隐藏',
+    alwaysShow: '是否常显示',
+    parentName: '父菜单',
+    sort: '排序',
+    icon: '图标',
+    noCache: '是否不缓存'
   },
   example: {
     warning: '创建和编辑页面是不能被 keep-alive 缓存的，因为keep-alive 的 include 目前不支持根据路由来缓存，所以目前都是基于 component name 来进行缓存的。如果你想类似的实现缓存效果，可以使用 localStorage 等浏览器缓存方案。或者不要使用 keep-alive 的 include，直接缓存所有页面。详情见'
