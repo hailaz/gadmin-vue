@@ -4,6 +4,9 @@
       <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
         {{ $t('table.add') }}
       </el-button>
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-zoom-in" @click="viewMenu">
+        预览菜单
+      </el-button>
     </div>
 
     <el-table
@@ -14,17 +17,17 @@
       highlight-current-row
       style="width: 100%;"
     >
-      <el-table-column width="180px" :label="$t('table.name')">
+      <el-table-column width="100px" :label="$t('table.name')">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column width="110px" :label="$t('table.title')">
         <template slot-scope="scope">
-          <span>{{ scope.row.meta.title }}</span>
+          <span>{{ $t('route.'+scope.row.meta.title) }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" :label="$t('table.path')" width="65">
+      <el-table-column align="center" :label="$t('table.path')" min-width="150px">
         <template slot-scope="scope">
           <span>{{ scope.row.path }}</span>
         </template>
@@ -35,7 +38,7 @@
           <span>{{ scope.row.component }}</span>
         </template>
       </el-table-column>
-      <el-table-column min-width="100px" :label="$t('table.redirect')">
+      <el-table-column width="100px" :label="$t('table.redirect')">
         <template slot-scope="scope">
           <span>{{ scope.row.redirect }}</span>
         </template>
@@ -59,7 +62,7 @@
         </template>
       </el-table-column>
 
-      <el-table-column width="110px" :label="$t('table.sort')">
+      <el-table-column width="80px" :label="$t('table.sort')">
         <template slot-scope="scope">
           <span>{{ scope.row.sort }}</span>
         </template>
@@ -67,6 +70,7 @@
 
       <el-table-column width="110px" :label="$t('table.icon')">
         <template slot-scope="scope">
+          <svg-icon :icon-class="setIcon(scope.row.meta.icon)" />
           <span>{{ scope.row.meta.icon }}</span>
         </template>
       </el-table-column>
@@ -121,6 +125,7 @@
 
         <el-form-item :label="$t('table.parentName')" prop="parentName">
           <el-select v-model="temp.parent_name" class="filter-item" placeholder="Please select">
+
             <el-option v-for="item in menuNameList" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
@@ -132,7 +137,10 @@
           <el-input v-model="temp.sort" />
         </el-form-item>
         <el-form-item :label="$t('table.icon')" prop="icon">
-          <el-input v-model="temp.meta.icon" />
+          <el-select v-model="temp.meta.icon" class="filter-item" placeholder="Please select">
+            <!-- <svg-icon icon-class="user" /> -->
+            <el-option v-for="item in svgIcons" :key="item" :label="item" :value="item" />
+          </el-select>
         </el-form-item>
 
       </el-form>
@@ -146,13 +154,27 @@
       </div>
     </el-dialog>
 
+    <el-dialog :visible.sync="dialogViewMenuVisible" title="预览菜单">
+      <el-form label-width="80px" label-position="left">
+        <el-tree ref="tree" :data="routesData" :props="defaultProps" node-key="path" class="permission-tree" />
+      </el-form>
+      <div style="text-align:right;">
+        <el-button type="danger" @click="dialogViewMenuVisible=false">
+          {{ $t('table.cancel') }}
+        </el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
-import { getMenus, addMenu, updateMenu, deleteMenu } from '@/api/menu'
+import { getMenus, addMenu, updateMenu, deleteMenu, getUserMenus } from '@/api/menu'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import path from 'path'
+import i18n from '@/lang'
+import svgIcons from '@/utils/svg-icons'
 
 export default {
   name: 'ComplexTable',
@@ -205,13 +227,44 @@ export default {
         { key: 1, label: '是', value: true },
         { key: 0, label: '否', value: false }
       ],
-      menuNameList: []
+      menuNameList: [],
+      routes: [],
+      dialogViewMenuVisible: false,
+      defaultProps: {
+        children: 'children',
+        label: 'title'
+      },
+      svgIcons: svgIcons
+    }
+  },
+  computed: {
+    routesData() {
+      return this.routes
     }
   },
   created() {
+    console.log(this.svgIcons)
     this.getList()
   },
   methods: {
+    async getRoutes() {
+      const res = await getUserMenus()
+      this.serviceRoutes = res.data
+      const routes = this.generateRoutes(res.data)
+
+      this.routes = this.i18n(routes)
+    },
+    i18n(routes) {
+      const app = routes.map(route => {
+        route.title = i18n.t(`route.${route.title}`)
+        if (route.children) {
+          route.children = this.i18n(route.children)
+        }
+        return route
+      })
+
+      return app
+    },
     getList() {
       this.listLoading = true
       getMenus(this.listQuery).then(response => {
@@ -320,7 +373,98 @@ export default {
           })
         })
       })
+    },
+    setIcon(icon) {
+      return icon
+    },
+
+    viewMenu() {
+      this.getRoutes()
+      this.dialogViewMenuVisible = true
+      this.checkStrictly = true
+      this.$nextTick(() => {
+        const routes = this.generateRoutes(this.routes)
+        this.$refs.tree.setCheckedNodes(this.generateArr(routes))
+        // set checked state of a node not affects its father and child nodes
+        this.checkStrictly = false
+      })
+    },
+    // Reshape the routes structure so that it looks the same as the sidebar
+    generateRoutes(routes, basePath = '/') {
+      const res = []
+      routes.sort(function(a, b) { // 升序
+        return a.sort - b.sort
+      })
+      for (let route of routes) {
+        // skip some route
+        if (route.hidden) { continue }
+
+        const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
+
+        if (route.children && onlyOneShowingChild && !route.alwaysShow) {
+          route = onlyOneShowingChild
+        }
+
+        const data = {
+          path: path.resolve(basePath, route.path),
+          title: route.meta && route.meta.title
+
+        }
+
+        // recursive child routes
+        if (route.children) {
+          route.children.sort(function(a, b) { // 升序
+            return a.sort - b.sort
+          })
+          data.children = this.generateRoutes(route.children, data.path)
+        }
+        res.push(data)
+      }
+      return res
+    },
+    generateArr(routes) {
+      let data = []
+      routes.forEach(route => {
+        data.push(route)
+        if (route.children) {
+          const temp = this.generateArr(route.children)
+          if (temp.length > 0) {
+            data = [...data, ...temp]
+          }
+        }
+      })
+      return data
+    },
+    // reference: src/view/layout/components/Sidebar/SidebarItem.vue
+    onlyOneShowingChild(children = [], parent) {
+      let onlyOneChild = null
+      if (children == null) {
+        return false
+      }
+      const showingChildren = children.filter(item => !item.hidden)
+
+      // When there is only one child route, the child route is displayed by default
+      if (showingChildren.length === 1) {
+        onlyOneChild = showingChildren[0]
+        onlyOneChild.path = path.resolve(parent.path, onlyOneChild.path)
+        return onlyOneChild
+      }
+
+      // Show parent if there are no child route to display
+      if (showingChildren.length === 0) {
+        onlyOneChild = { ... parent, path: '', noShowingChildren: true }
+        return onlyOneChild
+      }
+
+      return false
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+.app-container {
+  .permission-tree {
+    margin-bottom: 30px;
+  }
+}
+</style>
