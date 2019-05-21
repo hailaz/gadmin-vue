@@ -23,18 +23,21 @@
           <span>{{ scope.row.role }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.roleName')" min-width="150px" align="center">
+      <el-table-column :label="$t('table.roleName')" width="150px" align="center">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column :label="$t('table.actions')" align="center" width="230" class-name="small-padding fixed-width">
+      <el-table-column :label="$t('table.actions')" align="center" min-width="230" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
           <el-button type="primary" size="mini" @click="handleUpdatePolicy(row)">
             {{ $t('table.policy') }}
+          </el-button>
+          <el-button type="primary" size="mini" @click="viewMenu(row)">
+            {{ $t('table.menu') }}
           </el-button>
           <el-button size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
             {{ $t('table.delete') }}
@@ -80,14 +83,31 @@
         </el-button>
       </span>
     </el-dialog>
+
+    <el-dialog :visible.sync="dialogViewMenuVisible" title="预览菜单">
+      <el-form label-width="80px" label-position="left">
+        <el-tree ref="tree" :data="routesData" :check-strictly="checkStrictly" :props="defaultProps" show-checkbox :default-expand-all="true" node-key="name" class="permission-tree" />
+      </el-form>
+      <div style="text-align:right;">
+        <el-button type="danger" @click="dialogViewMenuVisible=false">
+          {{ $t('permission.cancel') }}
+        </el-button>
+        <el-button type="primary" @click="confirmRoleMenus">
+          {{ $t('permission.confirm') }}
+        </el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getRoles, addRole, updateRole, deleteRole } from '@/api/role'
+import { getUserMenus } from '@/api/menu'
+import { getRoles, addRole, updateRole, deleteRole, setRoleMenus } from '@/api/role'
 import { getPolicyByRole, setPolicyByRole } from '@/api/policy'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import path from 'path'
+import i18n from '@/lang'
 
 export default {
   name: 'ComplexTable',
@@ -135,13 +155,37 @@ export default {
       checkedAllPolicys: [],
       allPolicys: [],
       isIndeterminate: false,
-      currentRole: ''
+      currentRole: '',
+      routes: [],
+      roleRoutes: [],
+      dialogViewMenuVisible: false,
+      checkStrictly: false,
+      defaultProps: {
+        children: 'children',
+        label: 'title'
+      }
+    }
+  },
+  computed: {
+    routesData() {
+      return this.routes
     }
   },
   created() {
     this.getList()
   },
   methods: {
+    i18n(routes) {
+      const app = routes.map(route => {
+        route.title = i18n.t(`route.${route.title}`)
+        if (route.children) {
+          route.children = this.i18n(route.children)
+        }
+        return route
+      })
+
+      return app
+    },
     getList() {
       this.listLoading = true
       getRoles(this.listQuery).then(response => {
@@ -287,7 +331,119 @@ export default {
       setPolicyByRole({ role: this.currentRole, policys: this.checkedPolicys }).then(() => {
         this.currentRole = ''
         this.dialogPolicyVisible = false
+        this.$message({
+          type: 'success',
+          message: 'success!'
+        })
       })
+    },
+    viewMenu(row) {
+      this.currentRole = row.role
+      getUserMenus({ rolename: row.role }).then(response => {
+        this.roleRoutes = response.data.role_menus
+        const routes = this.generateRoutes(response.data.menus)
+        this.routes = this.i18n(routes)
+        this.dialogViewMenuVisible = true
+        this.checkStrictly = true
+        this.$nextTick(() => {
+          const routes = this.generateRoutes(this.roleRoutes)
+          this.$refs.tree.setCheckedNodes(this.generateArr(routes))
+          // set checked state of a node not affects its father and child nodes
+          this.checkStrictly = false
+        })
+      })
+    },
+    // Reshape the routes structure so that it looks the same as the sidebar
+    generateRoutes(routes, basePath = '/') {
+      const res = []
+      routes.sort(function(a, b) { // 升序
+        return a.sort - b.sort
+      })
+      for (let route of routes) {
+        // skip some route
+        if (route.hidden) { continue }
+
+        const onlyOneShowingChild = this.onlyOneShowingChild(route.children, route)
+
+        if (route.children && onlyOneShowingChild && !route.alwaysShow) {
+          route = onlyOneShowingChild
+        }
+
+        const data = {
+          name: route.name,
+          path: path.resolve(basePath, route.path),
+          title: route.meta && route.meta.title,
+          parent_name: route.parent_name
+        }
+
+        // recursive child routes
+        if (route.children) {
+          route.children.sort(function(a, b) { // 升序
+            return a.sort - b.sort
+          })
+          data.children = this.generateRoutes(route.children, data.path)
+        }
+        res.push(data)
+      }
+      return res
+    },
+    generateArr(routes) {
+      let data = []
+      routes.forEach(route => {
+        data.push(route)
+        if (route.children) {
+          const temp = this.generateArr(route.children)
+          if (temp.length > 0) {
+            data = [...data, ...temp]
+          }
+        }
+      })
+      return data
+    },
+    getRealKeys(keys) {
+      const realKeys = []
+      keys.forEach(key => {
+        realKeys.push(key.name)
+        if (key.parent_name !== '') {
+          realKeys.push(key.parent_name)
+        }
+      })
+
+      return Array.from(new Set(realKeys))
+    },
+    async confirmRoleMenus() {
+      const checkedNodes = this.$refs.tree.getCheckedNodes()
+      setRoleMenus({ role: this.currentRole, menus: this.getRealKeys(checkedNodes) }).then(() => {
+        this.currentRole = ''
+        this.dialogViewMenuVisible = false
+        this.$message({
+          type: 'success',
+          message: 'success!'
+        })
+      })
+    },
+    // reference: src/view/layout/components/Sidebar/SidebarItem.vue
+    onlyOneShowingChild(children = [], parent) {
+      let onlyOneChild = null
+      if (children == null) {
+        return false
+      }
+      const showingChildren = children.filter(item => !item.hidden)
+
+      // When there is only one child route, the child route is displayed by default
+      if (showingChildren.length === 1) {
+        onlyOneChild = showingChildren[0]
+        onlyOneChild.path = path.resolve(parent.path, onlyOneChild.path)
+        return onlyOneChild
+      }
+
+      // Show parent if there are no child route to display
+      if (showingChildren.length === 0) {
+        onlyOneChild = { ... parent, path: '', noShowingChildren: true }
+        return onlyOneChild
+      }
+
+      return false
     }
   }
 }

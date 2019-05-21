@@ -156,11 +156,11 @@
 
     <el-dialog :visible.sync="dialogViewMenuVisible" title="预览菜单">
       <el-form label-width="80px" label-position="left">
-        <el-tree ref="tree" :data="routesData" :props="defaultProps" node-key="path" class="permission-tree" />
+        <el-tree ref="tree" :data="routesData" :props="defaultProps" node-key="path" :default-expand-all="true" class="permission-tree" />
       </el-form>
       <div style="text-align:right;">
         <el-button type="danger" @click="dialogViewMenuVisible=false">
-          {{ $t('table.cancel') }}
+          {{ $t('table.close') }}
         </el-button>
       </div>
     </el-dialog>
@@ -243,7 +243,6 @@ export default {
     }
   },
   created() {
-    console.log(this.svgIcons)
     this.getList()
   },
   methods: {
@@ -377,7 +376,6 @@ export default {
     setIcon(icon) {
       return icon
     },
-
     viewMenu() {
       this.getRoutes()
       this.dialogViewMenuVisible = true

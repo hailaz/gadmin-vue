@@ -46,3 +46,11 @@ export function setUserRoleByUserName(data) {
     data
   })
 }
+
+export function setRoleMenus(data) {
+  return request({
+    url: '/v1/role/menu',
+    method: 'put',
+    data
+  })
+}

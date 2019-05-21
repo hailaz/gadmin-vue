@@ -1,9 +1,10 @@
 import request from '@/utils/request'
 
-export function getUserMenus() {
+export function getUserMenus(query) {
   return request({
     url: '/v1/user/menu',
-    method: 'get'
+    method: 'get',
+    params: query
   })
 }
 
