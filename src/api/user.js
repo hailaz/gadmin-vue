@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function list(query) {
   return request({
-    url: '/v1/user/list',
+    url: '/user/list',
     method: 'get',
     params: query
   })
@@ -32,21 +32,21 @@ export function refreshToken() {
 
 export function getInfo() {
   return request({
-    url: '/v1/user/info',
+    url: '/user/info',
     method: 'get'
   })
 }
 
 export function logout() {
   return request({
-    url: '/v1/user/logout',
+    url: '/logout',
     method: 'post'
   })
 }
 
 export function getUsers(query) {
   return request({
-    url: '/v1/user',
+    url: '/user',
     method: 'get',
     params: query
   })
@@ -54,7 +54,7 @@ export function getUsers(query) {
 
 export function addUser(data) {
   return request({
-    url: '/v1/user',
+    url: '/user',
     method: 'post',
     data
   })
@@ -62,7 +62,7 @@ export function addUser(data) {
 
 export function updateUser(data) {
   return request({
-    url: `/v1/user`,
+    url: `/user`,
     method: 'put',
     data
   })
@@ -70,7 +70,7 @@ export function updateUser(data) {
 
 export function deleteUser(data) {
   return request({
-    url: `/v1/user`,
+    url: `/user`,
     method: 'delete',
     data
   })

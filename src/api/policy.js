@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getPolicys(query) {
   return request({
-    url: '/v1/policy',
+    url: '/policy',
     method: 'get',
     params: query
   })
@@ -10,7 +10,7 @@ export function getPolicys(query) {
 
 export function updatePolicy(data) {
   return request({
-    url: `/v1/policy`,
+    url: `/policy`,
     method: 'put',
     data
   })
@@ -18,7 +18,7 @@ export function updatePolicy(data) {
 
 export function getPolicyByRole(query) {
   return request({
-    url: '/v1/policy/byrole',
+    url: '/policy/byrole',
     method: 'get',
     params: query
   })
@@ -26,7 +26,7 @@ export function getPolicyByRole(query) {
 
 export function setPolicyByRole(data) {
   return request({
-    url: '/v1/policy/byrole',
+    url: '/policy/byrole',
     method: 'put',
     data
   })

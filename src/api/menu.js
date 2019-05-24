@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 export function getUserMenus(query) {
   return request({
-    url: '/v1/user/menu',
+    url: '/user/menu',
     method: 'get',
     params: query
   })
@@ -10,7 +10,7 @@ export function getUserMenus(query) {
 
 export function getMenus(query) {
   return request({
-    url: '/v1/menu',
+    url: '/menu',
     method: 'get',
     params: query
   })
@@ -18,7 +18,7 @@ export function getMenus(query) {
 
 export function addMenu(data) {
   return request({
-    url: '/v1/menu',
+    url: '/menu',
     method: 'post',
     data
   })
@@ -26,7 +26,7 @@ export function addMenu(data) {
 
 export function updateMenu(data) {
   return request({
-    url: `/v1/menu`,
+    url: `/menu`,
     method: 'put',
     data
   })
@@ -34,7 +34,7 @@ export function updateMenu(data) {
 
 export function deleteMenu(data) {
   return request({
-    url: `/v1/menu`,
+    url: `/menu`,
     method: 'delete',
     data
   })
