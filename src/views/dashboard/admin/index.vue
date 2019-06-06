@@ -2,7 +2,10 @@
   <div class="dashboard-editor-container">
     Welcome to gadmin！
     <br>
-    <a href="https://github.com/hailaz/gadmin" target="_blank" rel="noopener noreferrer">访问 gadmin github</a>
+    <a href="https://github.com/hailaz/gadmin" target="_blank" rel="noopener noreferrer">
+      <img src="https://github.com/hailaz/gadmin/raw/master/docfile/gadmin.png" alt="gadmin结构" style="width:90%;max-width:1200px;" title="访问 gadmin github">
+    </a>
+
     <!-- <github-corner class="github-corner" />
 
     <panel-group @handleSetLineChartData="handleSetLineChartData" />
