@@ -86,7 +86,7 @@
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             {{ $t('table.edit') }}
           </el-button>
-          <el-button v-if="row.user_name!='admin'" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
+          <el-button v-if="!row.auto_create" size="mini" type="danger" @click="handleModifyStatus(row,'deleted')">
             {{ $t('table.delete') }}
           </el-button>
         </template>
@@ -125,7 +125,7 @@
 
         <el-form-item :label="$t('table.parentName')" prop="parentName">
           <el-select v-model="temp.parent_name" class="filter-item" placeholder="Please select">
-
+            <el-option key="null" label="Null" value="" />
             <el-option v-for="item in menuNameList" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
@@ -139,6 +139,7 @@
         <el-form-item :label="$t('table.icon')" prop="icon">
           <el-select v-model="temp.meta.icon" class="filter-item" placeholder="Please select">
             <!-- <svg-icon icon-class="user" /> -->
+            <el-option key="null" label="Null" value="" />
             <el-option v-for="item in svgIcons" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
